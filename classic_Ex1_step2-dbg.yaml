@@ -1,0 +1,111 @@
+---
+- name: Configuring Example Tenant
+  hosts: DMZ
+  collections:
+   - cisco.aci
+  connection: local
+  gather_facts: False
+
+  tasks:
+  - name: Create a New Tenant
+    aci_tenant:
+      host: "{{ ansible_host  }}"
+      username: "{{ username }}"
+      private_key: "{{ private_key }}"
+      tenant: sulye5
+      description: "Tenant configured by Ansible"
+      validate_certs: no
+      state: present
+      output_path: 'config.json'
+
+  - name: create a new VRF
+    aci_vrf:
+      hostname: "{{ ansible_host  }}"
+      username: "{{ username }}"
+      private_key: "{{ private_key }}"
+      validate_certs: False
+      state: present
+      vrf: Demo
+      tenant: sulye5
+      descr: "Ansible created VRF"
+      policy_control_preference: enforced
+      policy_control_direction: ingress
+      output_path: 'config.json'
+
+  - name: create bridge domain
+    aci_bd:
+      hostname: "{{ ansible_host  }}"
+      username: "{{ username }}"
+      private_key: "{{ private_key }}"
+      validate_certs: False
+      state: present
+      tenant: sulye5
+      bd: MyBD
+      vrf: Demo
+      enable_routing: yes
+      arp_flooding: no
+      l2_unknown_unicast: flood
+      output_path: 'config.json'
+
+  - name: Add a new AP
+    aci_ap:
+      hostname: "{{ ansible_host  }}"
+      username: "{{ username }}"
+      private_key: "{{ private_key }}"
+      validate_certs: False
+      tenant: sulye5
+      ap: MyApp
+      description: default ap
+      state: present
+      output_path: 'config.json'
+
+  - name: create EPG for Web-Tier
+    aci_epg:
+      hostname: "{{ ansible_host  }}"
+      username: "{{ username }}"
+      private_key: "{{ private_key }}"
+      validate_certs: False
+      state: present
+      tenant: sulye5
+      epg: Web
+      ap: MyApp
+      bd: MyBD
+      output_path: 'config.json'
+
+  - name: contract for Web-Tier to internet
+    aci_epg_to_contract:
+      hostname: "{{ ansible_host  }}"
+      username: "{{ username }}"
+      private_key: "{{ private_key }}"
+      validate_certs: False
+      state: present
+      tenant: sulye5
+      epg: Web
+      ap: MyApp
+      contract_type: consumer
+      contract: Allow-Internet
+      output_path: 'config.json'
+
+  - name: contract for Web-Tier to internet
+    aci_contract:
+      hostname: "{{ ansible_host  }}"
+      username: "{{ username }}"
+      private_key: "{{ private_key }}"
+      validate_certs: False
+      contract: Allow-Internet
+      description: "Allow-Internet-Contract"
+      tenant: sulye5
+      scope: tenant
+      output_path: 'config.json'
+
+  - name: contract for Web-Tier to internet
+    aci_contract_subject:
+      hostname: "{{ ansible_host  }}"
+      username: "{{ username }}"
+      private_key: "{{ private_key }}"
+      validate_certs: False
+      contract: Allow-Internet
+      subject: default
+      description: "Allow-Internet-Contract"
+      tenant: sulye5
+      output_path: 'config.json'

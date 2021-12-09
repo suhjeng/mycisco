@@ -1,0 +1,8 @@
+DMZ:
+  hosts:
+    apic:
+      ansible_host: 192.168.8.2
+      username: admin
+      private_key: adminsj.key
+      #password: 12345C1scoUC$
+      ansible_python_interpreter: "/opt/anaconda3/bin/python"
